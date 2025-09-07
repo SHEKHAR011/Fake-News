@@ -1,75 +1,85 @@
 export const LIGHT_THEME = {
-  // Message bubbles
-  USER_BUBBLE: '#10a37f', // More subtle green for user messages
+  // Message bubbles with enhanced modern design
+  USER_BUBBLE: '#0ea5e9', // Vibrant sky blue for user messages
   AI_BUBBLE: '#ffffff',   // Clean white for AI messages
   
-  // Status colors - Softer, more professional tones
-  REAL: '#10b981',        // Emerald green
-  FAKE: '#ef4444',        // Red (keeping the same for clear indication)
-  UNCERTAIN: '#f59e0b',   // Amber for warnings
-  DEFAULT_TEXT: '#374151', // Darker gray for better readability
+  // Status colors - Modern, vibrant palette
+  REAL: '#10b981',        // Emerald green (keeping for positive)
+  FAKE: '#f43f5e',        // Modern rose for warnings
+  UNCERTAIN: '#f59e0b',   // Amber for uncertainties
+  DEFAULT_TEXT: '#1e293b', // Modern slate for better readability
   
-  // UI colors - Softer, more harmonious palette
-  BACKGROUND: '#f9fafb',     // Softer background
+  // UI colors - Modern, clean palette
+  BACKGROUND: '#f1f5f9',     // Light slate background
   SURFACE: '#ffffff',        // Clean white surfaces
-  BORDER: '#e5e7eb',         // Subtle borders
-  TIMESTAMP: '#9ca3af',      // Muted gray for timestamps
-  DISABLED: '#d1d5db',       // Light gray for disabled states
-  HOVER: '#f3f4f6',          // Hover states
+  BORDER: '#e2e8f0',         // Subtle borders
+  TIMESTAMP: '#94a3b8',      // Muted slate for timestamps
+  DISABLED: '#cbd5e1',       // Light slate for disabled states
+  HOVER: '#e0f2fe',          // Light blue hover state
+  ACCENT: '#38bdf8',         // Accent color for highlights
   
   // Avatar colors
-  AI_AVATAR: '#10b981',      // Matching the real status color
-  USER_AVATAR: '#10a37f',    // Matching user bubble color
+  AI_AVATAR: '#0ea5e9',      // Matching user bubble color
+  USER_AVATAR: '#0ea5e9',    // Matching user bubble color
   
   // Header colors
   HEADER_BACKGROUND: '#ffffff',
-  HEADER_BORDER: '#e5e7eb',
+  HEADER_BORDER: '#e2e8f0',
   
   // Sidebar colors
   SIDEBAR_BACKGROUND: '#ffffff',
-  SIDEBAR_BORDER: '#e5e7eb',
+  SIDEBAR_BORDER: '#e2e8f0',
   
   // Input area
-  INPUT_BORDER: '#e5e7eb',
+  INPUT_BORDER: '#cbd5e1',
   INPUT_BACKGROUND: '#ffffff',
-  INPUT_PLACEHOLDER: '#9ca3af',
+  INPUT_PLACEHOLDER: '#94a3b8',
+  
+  // Gradients for visual interest
+  GRADIENT_START: '#0ea5e9',
+  GRADIENT_END: '#38bdf8',
 };
 
 export const DARK_THEME = {
-  // Message bubbles
-  USER_BUBBLE: '#10a37f', // Keeping the same for brand consistency
-  AI_BUBBLE: '#2d3748',   // Dark gray for AI messages
+  // Message bubbles with enhanced modern design
+  USER_BUBBLE: '#0ea5e9', // Vibrant sky blue for user messages
+  AI_BUBBLE: '#1e293b',   // Dark slate for AI messages
   
-  // Status colors
+  // Status colors - Modern, vibrant palette for dark mode
   REAL: '#34d399',        // Softer green for dark mode
-  FAKE: '#f87171',        // Softer red for dark mode
+  FAKE: '#fb7185',        // Softer rose for dark mode
   UNCERTAIN: '#fbbf24',   // Softer amber for dark mode
-  DEFAULT_TEXT: '#e2e8f0', // Light gray for better readability in dark mode
+  DEFAULT_TEXT: '#f1f5f9', // Light slate for better readability in dark mode
   
-  // UI colors
-  BACKGROUND: '#1a202c',     // Dark background
-  SURFACE: '#2d3748',        // Darker surface
-  BORDER: '#4a5568',         // Subtle borders for dark mode
-  TIMESTAMP: '#a0aec0',      // Muted gray for timestamps in dark mode
-  DISABLED: '#718096',       // Darker gray for disabled states
-  HOVER: '#4a5568',          // Hover states for dark mode
+  // UI colors - Modern dark palette
+  BACKGROUND: '#0f172a',     // Dark slate background
+  SURFACE: '#1e293b',        // Darker surface
+  BORDER: '#334155',         // Subtle borders for dark mode
+  TIMESTAMP: '#94a3b8',      // Muted slate for timestamps in dark mode
+  DISABLED: '#475569',       // Darker slate for disabled states
+  HOVER: '#1e293b',          // Hover states for dark mode
+  ACCENT: '#38bdf8',         // Accent color for highlights
   
   // Avatar colors
-  AI_AVATAR: '#34d399',      // Matching the real status color
-  USER_AVATAR: '#10a37f',    // Matching user bubble color
+  AI_AVATAR: '#0ea5e9',      // Matching user bubble color
+  USER_AVATAR: '#0ea5e9',    // Matching user bubble color
   
   // Header colors
-  HEADER_BACKGROUND: '#2d3748',
-  HEADER_BORDER: '#4a5568',
+  HEADER_BACKGROUND: '#1e293b',
+  HEADER_BORDER: '#334155',
   
   // Sidebar colors
-  SIDEBAR_BACKGROUND: '#2d3748',
-  SIDEBAR_BORDER: '#4a5568',
+  SIDEBAR_BACKGROUND: '#1e293b',
+  SIDEBAR_BORDER: '#334155',
   
   // Input area
-  INPUT_BORDER: '#4a5568',
-  INPUT_BACKGROUND: '#2d3748',
-  INPUT_PLACEHOLDER: '#a0aec0',
+  INPUT_BORDER: '#334155',
+  INPUT_BACKGROUND: '#1e293b',
+  INPUT_PLACEHOLDER: '#94a3b8',
+  
+  // Gradients for visual interest
+  GRADIENT_START: '#0ea5e9',
+  GRADIENT_END: '#38bdf8',
 };
 
 export type Theme = typeof LIGHT_THEME;

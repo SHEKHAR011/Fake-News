@@ -5,6 +5,7 @@ import { useTheme } from '../../src/contexts/ThemeContext';
 import { Message } from '../../src/types/Message';
 import ProgressIndicator from './ProgressIndicator';
 import TypingIndicator from './TypingIndicator';
+import AnalysisVisualization from './AnalysisVisualization';
 
 interface ChatMessageProps {
   message: Message;
@@ -35,21 +36,33 @@ const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ message, timestamp
           <MaterialIcons name="fact-check" size={20} color="#fff" />
         </View>
       )}
-      <View style={[styles.messageContent, { backgroundColor: theme.AI_BUBBLE }]}>
-        {isLoading ? (
-          loadingStage ? (
-            <ProgressIndicator stage={loadingStage} />
+      <View style={styles.messageContainer}>
+        <View style={[
+          styles.messageContent, 
+          { 
+            backgroundColor: message.isUser ? theme.USER_BUBBLE : theme.AI_BUBBLE,
+            borderBottomLeftRadius: message.isUser ? 4 : 18,
+            borderBottomRightRadius: message.isUser ? 18 : 4,
+          }
+        ]}>
+          {isLoading ? (
+            loadingStage ? (
+              <ProgressIndicator stage={loadingStage} />
+            ) : (
+              <TypingIndicator />
+            )
           ) : (
-            <TypingIndicator />
-          )
-        ) : (
-          <>
-            <Text style={[styles.messageText, { color: getTextColor() }]}>{message.text}</Text>
-            {timestamp && (
-              <Text style={[styles.timestamp, { color: theme.TIMESTAMP }]}>{timestamp}</Text>
-            )}
-          </>
-        )}
+            <>
+              {!message.isUser && message.status && (
+                <AnalysisVisualization status={message.status} />
+              )}
+              <Text style={[styles.messageText, { color: message.isUser ? '#fff' : getTextColor() }]}>{message.text}</Text>
+              {timestamp && (
+                <Text style={[styles.timestamp, { color: message.isUser ? '#e0f2fe' : theme.TIMESTAMP }]}>{timestamp}</Text>
+              )}
+            </>
+          )}
+        </View>
       </View>
       {message.isUser && (
         <View style={[styles.userAvatar, { backgroundColor: theme.USER_AVATAR }]}>
@@ -86,6 +99,9 @@ const styles = StyleSheet.create({
   aiBubble: {
     justifyContent: 'flex-start',
   },
+  messageContainer: {
+    flex: 1,
+  },
   avatar: {
     width: 36,
     height: 36,
@@ -93,6 +109,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    marginTop: 24,
   },
   userAvatar: {
     width: 36,
@@ -101,21 +118,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 12,
+    marginTop: 24,
   },
   messageContent: {
-    flex: 1,
     borderRadius: 18,
     padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 2,
+    maxWidth: '90%',
   },
   messageText: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    lineHeight: 22,
+    lineHeight: 24,
+    letterSpacing: 0.1,
   },
   timestamp: {
     fontSize: 12,

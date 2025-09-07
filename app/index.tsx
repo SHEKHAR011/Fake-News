@@ -1,7 +1,9 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
-import React, { useEffect, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Modal, Alert } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Modal, Alert, Animated, Easing } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { analyzeNewsWithGemini } from '../services/geminiService';
 import { Message } from '../src/types/Message';
 import { formatTime } from '../utils/helpers';
@@ -9,6 +11,7 @@ import { validateNewsContent } from '../utils/validators';
 import { Conversation, createConversation, loadConversations, saveConversations, loadConversationMessages, saveConversationMessages } from '../utils/conversationStorage';
 import ChatMessage from './components/ChatMessage';
 import InputArea from './components/InputArea';
+import WelcomeMessage from './components/WelcomeMessage';
 import { useTheme } from '../src/contexts/ThemeContext';
 
 export default function HomeScreen() {
@@ -20,6 +23,10 @@ export default function HomeScreen() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const scrollViewRef = React.useRef<ScrollView>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(300)).current;
+  const messageFadeAnims = useRef<{[key: string]: Animated.Value}>({}).current;
+  const loadingFadeAnim = useRef(new Animated.Value(0)).current;
 
   // Load messages and conversations from storage on component mount
   useEffect(() => {
@@ -35,32 +42,66 @@ export default function HomeScreen() {
         const conversationMessages = await loadConversationMessages(firstConversation.id);
         if (conversationMessages.length > 0) {
           setMessages(conversationMessages);
+          // Animate all loaded messages
+          conversationMessages.forEach(message => {
+            if (!messageFadeAnims[message.id]) {
+              messageFadeAnims[message.id] = new Animated.Value(0);
+            }
+            Animated.timing(messageFadeAnims[message.id], {
+              toValue: 1,
+              duration: 300,
+              useNativeDriver: true,
+            }).start();
+          });
         } else {
-          // Set default welcome message if no messages exist
+          // Set default welcome message with empty text to trigger WelcomeMessage component
           const welcomeMessage: Message = {
             id: 1,
-            text: "Hello! I'm your Fake News Detector. Send me any news content and I'll analyze its credibility for you.",
+            text: "",  // Empty text triggers WelcomeMessage component
             isUser: false,
             timestamp: new Date(),
           };
           setMessages([welcomeMessage]);
+          // Animate welcome message
+          if (!messageFadeAnims[welcomeMessage.id]) {
+            messageFadeAnims[welcomeMessage.id] = new Animated.Value(0);
+          }
+          Animated.timing(messageFadeAnims[welcomeMessage.id], {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
         }
       } else {
+        // Check if this is the user's first time
+        const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
+        
         // Create first conversation
         const newConversation = createConversation("New Analysis");
         setConversations([newConversation]);
         setCurrentConversationId(newConversation.id);
         await saveConversations([newConversation]);
         
-        // Set default welcome message
+        // Set appropriate welcome message with empty text to trigger WelcomeMessage component
         const welcomeMessage: Message = {
           id: 1,
-          text: "Hello! I'm your Fake News Detector. Send me any news content and I'll analyze its credibility for you.",
+          text: hasOnboarded ? "" : "",  // Empty text triggers WelcomeMessage component
           isUser: false,
           timestamp: new Date(),
         };
+        
         setMessages([welcomeMessage]);
         await saveConversationMessages(newConversation.id, [welcomeMessage]);
+        
+        // Animate welcome message
+        if (!messageFadeAnims[welcomeMessage.id]) {
+          messageFadeAnims[welcomeMessage.id] = new Animated.Value(0);
+        }
+        Animated.timing(messageFadeAnims[welcomeMessage.id], {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
       }
     };
 
@@ -89,6 +130,30 @@ export default function HomeScreen() {
     };
   }, []);
 
+  // Sidebar animation effect
+  useEffect(() => {
+    if (sidebarVisible) {
+      // Slide in animation
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          easing: Easing.out(Easing.exp),
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        })
+      ]).start();
+    } else {
+      // Reset values for next open
+      slideAnim.setValue(300);
+      fadeAnim.setValue(0);
+    }
+  }, [sidebarVisible, fadeAnim, slideAnim]);
+
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -108,13 +173,30 @@ export default function HomeScreen() {
         timestamp: new Date(),
         status: "uncertain",
       };
+      
+      // Create fade animation for error message
+      if (!messageFadeAnims[errorMessage.id]) {
+        messageFadeAnims[errorMessage.id] = new Animated.Value(0);
+      }
+      
       setMessages(prev => [...prev, errorMessage]);
+      
+      // Animate error message
+      Animated.timing(messageFadeAnims[errorMessage.id], {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
       return;
     }
 
     if (isLoading || currentConversationId === null) return;
 
-    // Add user message
+    // Add haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    // Add user message with animation
     const userMessage: Message = {
       id: messages.length + 1,
       text: inputText,
@@ -122,16 +204,47 @@ export default function HomeScreen() {
       timestamp: new Date(),
     };
 
+    // Create fade animation for new message
+    if (!messageFadeAnims[userMessage.id]) {
+      messageFadeAnims[userMessage.id] = new Animated.Value(0);
+    }
+    
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     await saveConversationMessages(currentConversationId, newMessages);
+    
+    // Animate new message
+    Animated.timing(messageFadeAnims[userMessage.id], {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+    
     setIsLoading(true);
     setLoadingStage('analyzing');
+    
+    // Animate loading indicator
+    loadingFadeAnim.setValue(0);
+    Animated.timing(loadingFadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+      easing: Easing.ease,
+    }).start();
 
     try {
-      // Simulate stage progression for better UX
-      setTimeout(() => setLoadingStage('processing'), 1000);
-      setTimeout(() => setLoadingStage('generating'), 2000);
+      // Force each stage to be visible for a minimum time
+      await new Promise(resolve => {
+        setTimeout(() => {
+          setLoadingStage('processing');
+          setTimeout(() => {
+            setLoadingStage('generating');
+            setTimeout(() => {
+              resolve(null);
+            }, 1500); // Show generating for 1.5 seconds
+          }, 1500); // Show processing for 1.5 seconds
+        }, 1500); // Show analyzing for 1.5 seconds
+      });
       
       const analysis = await analyzeNewsWithGemini(inputText);
 
@@ -141,7 +254,10 @@ export default function HomeScreen() {
       else if (/high/i.test(analysis)) status = "fake";
       else if (/medium/i.test(analysis)) status = "uncertain";
 
-      // Add AI response
+      // Add haptic feedback for response
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      // Add AI response with animation
       const aiMessage: Message = {
         id: messages.length + 2,
         text: analysis,
@@ -150,9 +266,21 @@ export default function HomeScreen() {
         status,
       };
 
+      // Create fade animation for AI message
+      if (!messageFadeAnims[aiMessage.id]) {
+        messageFadeAnims[aiMessage.id] = new Animated.Value(0);
+      }
+      
       const finalMessages = [...newMessages, aiMessage];
       setMessages(finalMessages);
       await saveConversationMessages(currentConversationId, finalMessages);
+      
+      // Animate AI message
+      Animated.timing(messageFadeAnims[aiMessage.id], {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     } catch (error) {
       console.error('Error analyzing news:', error);
 
@@ -172,6 +300,9 @@ export default function HomeScreen() {
         }
       }
 
+      // Add haptic feedback for error
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
       const errorMessage: Message = {
         id: messages.length + 2,
         text: errorMessageText,
@@ -180,16 +311,39 @@ export default function HomeScreen() {
         status: "uncertain",
       };
 
+      // Create fade animation for error message
+      if (!messageFadeAnims[errorMessage.id]) {
+        messageFadeAnims[errorMessage.id] = new Animated.Value(0);
+      }
+      
       const finalMessages = [...newMessages, errorMessage];
       setMessages(finalMessages);
       await saveConversationMessages(currentConversationId, finalMessages);
+      
+      // Animate error message
+      Animated.timing(messageFadeAnims[errorMessage.id], {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     } finally {
-      setIsLoading(false);
-      setLoadingStage('analyzing');
+      // Fade out loading animation
+      Animated.timing(loadingFadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.ease,
+      }).start(() => {
+        setIsLoading(false);
+        setLoadingStage('analyzing');
+      });
     }
   };
 
   const startNewConversation = async () => {
+    // Add haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
     // Create new conversation
     const newConversation = createConversation("New Analysis");
     
@@ -201,24 +355,50 @@ export default function HomeScreen() {
     // Set as current conversation
     setCurrentConversationId(newConversation.id);
     
-    // Clear messages and start a new conversation
+    // Clear messages and start a new conversation with empty welcome message
+    // This will trigger the WelcomeMessage component to be displayed
     const welcomeMessage: Message = {
       id: 1,
-      text: "Hello! I'm your Fake News Detector. Send me any news content and I'll analyze its credibility for you.",
+      text: "",  // Empty text triggers WelcomeMessage component
       isUser: false,
       timestamp: new Date(),
     };
     
     setMessages([welcomeMessage]);
     await saveConversationMessages(newConversation.id, [welcomeMessage]);
+    
+    // Reset animation for welcome message
+    if (messageFadeAnims[welcomeMessage.id]) {
+      messageFadeAnims[welcomeMessage.id].setValue(0);
+      Animated.timing(messageFadeAnims[welcomeMessage.id], {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+    
     setSidebarVisible(false);
   };
 
   const switchConversation = async (conversationId: number) => {
+    // Add haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
     // Load messages for the selected conversation
     const conversationMessages = await loadConversationMessages(conversationId);
     setMessages(conversationMessages);
     setCurrentConversationId(conversationId);
+    
+    // Reset animations for the new messages
+    Object.keys(messageFadeAnims).forEach(key => {
+      messageFadeAnims[key].setValue(0);
+      Animated.timing(messageFadeAnims[key], {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+    
     setSidebarVisible(false);
   };
 
@@ -236,6 +416,9 @@ export default function HomeScreen() {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            // Add haptic feedback
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            
             // Prevent deleting the current conversation if it's the only one
             if (conversations.length <= 1) {
               // If this is the last conversation, create a new one first
@@ -244,16 +427,26 @@ export default function HomeScreen() {
               setCurrentConversationId(newConversation.id);
               await saveConversations([newConversation]);
               
-              // Set default welcome message
+              // Set default welcome message with empty text to trigger WelcomeMessage component
               const welcomeMessage: Message = {
                 id: 1,
-                text: "Hello! I'm your Fake News Detector. Send me any news content and I'll analyze its credibility for you.",
+                text: "",  // Empty text triggers WelcomeMessage component
                 isUser: false,
                 timestamp: new Date(),
               };
               
               setMessages([welcomeMessage]);
               await saveConversationMessages(newConversation.id, [welcomeMessage]);
+              
+              // Reset animation for welcome message
+              if (messageFadeAnims[welcomeMessage.id]) {
+                messageFadeAnims[welcomeMessage.id].setValue(0);
+                Animated.timing(messageFadeAnims[welcomeMessage.id], {
+                  toValue: 1,
+                  duration: 300,
+                  useNativeDriver: true,
+                }).start();
+              }
             } else {
               // If there are multiple conversations, delete this one
               const updatedConversations = conversations.filter(conv => conv.id !== conversationId);
@@ -297,22 +490,35 @@ export default function HomeScreen() {
           text: "Delete All",
           style: "destructive",
           onPress: async () => {
+            // Add haptic feedback
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            
             // Create a new conversation
             const newConversation = createConversation("New Analysis");
             setConversations([newConversation]);
             setCurrentConversationId(newConversation.id);
             await saveConversations([newConversation]);
             
-            // Set default welcome message
+            // Set default welcome message with empty text to trigger WelcomeMessage component
             const welcomeMessage: Message = {
               id: 1,
-              text: "Hello! I'm your Fake News Detector. Send me any news content and I'll analyze its credibility for you.",
+              text: "",  // Empty text triggers WelcomeMessage component
               isUser: false,
               timestamp: new Date(),
             };
             
             setMessages([welcomeMessage]);
             await saveConversationMessages(newConversation.id, [welcomeMessage]);
+            
+            // Reset animation for welcome message
+            if (messageFadeAnims[welcomeMessage.id]) {
+              messageFadeAnims[welcomeMessage.id].setValue(0);
+              Animated.timing(messageFadeAnims[welcomeMessage.id], {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+              }).start();
+            }
             
             // Delete all previous conversations' messages from storage
             for (const conversation of conversations) {
@@ -348,13 +554,13 @@ export default function HomeScreen() {
       
       {/* Sidebar Modal */}
       <Modal
-        animationType="slide"
+        animationType="none"
         transparent={true}
         visible={sidebarVisible}
         onRequestClose={() => setSidebarVisible(false)}
       >
-        <View style={[styles.sidebarOverlay, { backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)' }]}>
-          <View style={[styles.sidebar, { backgroundColor: theme.SIDEBAR_BACKGROUND, borderRightColor: theme.SIDEBAR_BORDER }]}>
+        <Animated.View style={[styles.sidebarOverlay, { backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)', opacity: fadeAnim }]}>
+          <Animated.View style={[styles.sidebar, { backgroundColor: theme.SIDEBAR_BACKGROUND, borderRightColor: theme.SIDEBAR_BORDER, transform: [{ translateX: slideAnim }] }]}>
             <View style={[styles.sidebarHeader, { borderBottomColor: theme.SIDEBAR_BORDER, backgroundColor: theme.SIDEBAR_BACKGROUND }]}>
               <Text style={[styles.sidebarTitle, { color: theme.DEFAULT_TEXT }]}>Fake News Detector</Text>
               <TouchableOpacity onPress={() => setSidebarVisible(false)} style={styles.closeButton}>
@@ -362,8 +568,14 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
             
-            <TouchableOpacity style={[styles.newChatButton, { backgroundColor: theme.USER_BUBBLE }]} onPress={startNewConversation}>
-              <MaterialIcons name="add" size={20} color="#fff" />
+            <TouchableOpacity 
+              style={styles.newChatButton} 
+              onPress={startNewConversation}
+              activeOpacity={0.7}
+            >
+              <View style={styles.newChatIconContainer}>
+                <MaterialIcons name="add" size={28} color="#fff" />
+              </View>
               <Text style={styles.newChatText}>New Analysis</Text>
             </TouchableOpacity>
             
@@ -411,8 +623,8 @@ export default function HomeScreen() {
             <View style={[styles.sidebarFooter, { borderTopColor: theme.SIDEBAR_BORDER, backgroundColor: theme.SIDEBAR_BACKGROUND }]}>
               <Text style={[styles.sidebarFooterText, { color: theme.TIMESTAMP }]}>Powered by Gemini AI</Text>
             </View>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       </Modal>
       
       {/* Main Content */}
@@ -427,10 +639,10 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: theme.DEFAULT_TEXT }]}>Fake News Detector</Text>
           <TouchableOpacity 
-            style={styles.menuButton} 
+            style={styles.headerAddButton} 
             onPress={startNewConversation}
           >
-            <MaterialIcons name="add" size={24} color={theme.DEFAULT_TEXT} />
+            <MaterialIcons name="add" size={26} color="#0ea5e9" />
           </TouchableOpacity>
         </View>
 
@@ -443,25 +655,65 @@ export default function HomeScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              timestamp={formatTime(message.timestamp)}
-            />
-          ))}
+          {messages.map((message, index) => {
+            // Create a fade animation for this message if it doesn't exist
+            if (!messageFadeAnims[message.id]) {
+              messageFadeAnims[message.id] = new Animated.Value(0);
+              Animated.timing(messageFadeAnims[message.id], {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+              }).start();
+            }
+            
+            return (
+              <Animated.View
+                key={message.id}
+                style={{
+                  opacity: messageFadeAnims[message.id],
+                  transform: [{
+                    translateY: messageFadeAnims[message.id].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0]
+                    })
+                  }]
+                }}
+              >
+                {message.text === "" ? (
+                  <WelcomeMessage />
+                ) : (
+                  <ChatMessage
+                    message={message}
+                    timestamp={formatTime(message.timestamp)}
+                  />
+                )}
+              </Animated.View>
+            );
+          })}
 
           {isLoading && (
-            <ChatMessage
-              message={{
-                id: 'typing',
-                text: '',
-                isUser: false,
-                timestamp: new Date(),
+            <Animated.View
+              style={{
+                opacity: loadingFadeAnim,
+                transform: [{
+                  translateY: loadingFadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0]
+                  })
+                }]
               }}
-              isLoading={true}
-              loadingStage={loadingStage}
-            />
+            >
+              <ChatMessage
+                message={{
+                  id: 'typing',
+                  text: '',
+                  isUser: false,
+                  timestamp: new Date(),
+                }}
+                isLoading={true}
+                loadingStage={loadingStage}
+              />
+            </Animated.View>
           )}
         </ScrollView>
 
@@ -490,10 +742,21 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
   },
   menuButton: {
     padding: 8,
-    borderRadius: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(14, 165, 233, 0.1)', // Light blue background
+  },
+  headerAddButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(14, 165, 233, 0.1)', // Light blue background
   },
   headerTitle: {
     fontSize: 18,
@@ -521,12 +784,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 20,
     borderBottomWidth: 1,
   },
   sidebarTitle: {
-    fontSize: 18,
-    fontFamily: 'Inter_600SemiBold',
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
     flex: 1,
   },
   closeButton: {
@@ -535,15 +798,33 @@ const styles = StyleSheet.create({
   newChatButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    margin: 16,
-    padding: 12,
-    borderRadius: 8,
+    marginHorizontal: 16,
+    marginVertical: 16,
+    padding: 18,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+    backgroundColor: '#0ea5e9', // Vibrant blue color
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  newChatIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   newChatText: {
     color: '#fff',
-    fontFamily: 'Inter_500Medium',
-    marginLeft: 10,
-    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    fontSize: 18,
+    letterSpacing: 0.5,
   },
   actionButtonsContainer: {
     paddingHorizontal: 16,
@@ -552,15 +833,20 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 12,
     marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   actionButtonText: {
     color: '#fff',
-    fontFamily: 'Inter_500Medium',
-    marginLeft: 8,
-    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    marginLeft: 12,
+    fontSize: 16,
   },
   conversationsList: {
     flex: 1,
@@ -569,31 +855,41 @@ const styles = StyleSheet.create({
   conversationItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 2,
+    marginVertical: 4,
+    marginHorizontal: 6,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   conversationItem: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 12,
+    marginVertical: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   deleteButton: {
-    padding: 12,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 12,
   },
   conversationTitle: {
     flex: 1,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'Inter_500Medium',
     marginLeft: 12,
-    fontSize: 15,
+    fontSize: 16,
   },
   conversationTime: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
+    marginLeft: 8,
   },
   sidebarFooter: {
-    padding: 16,
+    padding: 20,
     borderTopWidth: 1,
   },
   sidebarFooterText: {

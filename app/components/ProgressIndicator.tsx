@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../src/contexts/ThemeContext';
 
 interface ProgressIndicatorProps {
@@ -8,54 +9,105 @@ interface ProgressIndicatorProps {
 
 const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ stage }) => {
   const { theme } = useTheme();
+  const spinValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Spin animation
+    const spinAnimation = Animated.loop(
+      Animated.timing(spinValue, {
+        toValue: 1,
+        duration: 1000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    
+    spinAnimation.start();
+    
+    return () => {
+      spinAnimation.stop();
+    };
+  }, [spinValue]);
+
+  // Interpolate rotation
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
 
   const getStageText = () => {
     switch (stage) {
-      case 'analyzing': return 'Analyzing content...';
-      case 'processing': return 'Processing information...';
-      case 'generating': return 'Generating response...';
-      case 'complete': return 'Complete!';
-      default: return 'Analyzing...';
+      case 'analyzing':
+        return 'Analyzing...';
+      case 'processing':
+        return 'Processing...';
+      case 'generating':
+        return 'Generating...';
+      case 'complete':
+        return '✅ Complete!';
+      default:
+        return '🔍 Analyzing...';
+    }
+  };
+
+  const getStageIcon = () => {
+    switch (stage) {
+      case 'analyzing':
+        return 'search';
+      case 'processing':
+        return 'hourglass-empty';
+      case 'generating':
+        return 'auto-awesome';
+      case 'complete':
+        return 'check-circle';
+      default:
+        return 'search';
+    }
+  };
+
+  const getStageColor = () => {
+    switch (stage) {
+      case 'analyzing':
+        return theme.ACCENT;
+      case 'processing':
+        return theme.UNCERTAIN;
+      case 'generating':
+        return theme.REAL;
+      case 'complete':
+        return theme.REAL;
+      default:
+        return theme.ACCENT;
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.text, { color: theme.DEFAULT_TEXT }]}>{getStageText()}</Text>
-      <View style={[styles.progressBar, { backgroundColor: theme.BORDER }]}>
-        <View style={[
-          styles.progressFill, 
-          { 
-            width: 
-              stage === 'analyzing' ? '30%' : 
-              stage === 'processing' ? '60%' : 
-              stage === 'generating' ? '90%' : 
-              '100%',
-            backgroundColor: theme.USER_BUBBLE
-          }
-        ]} />
-      </View>
+      <Animated.View style={{ transform: [{ rotate: spin }] }}>
+        <MaterialIcons 
+          name={getStageIcon() as any} 
+          size={24} 
+          color={getStageColor()} 
+        />
+      </Animated.View>
+      <Text style={[styles.text, { color: theme.DEFAULT_TEXT, marginLeft: 12 }]}>
+        {getStageText()}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    borderRadius: 8,
+    margin: 4,
   },
   text: {
-    fontSize: 16,
-    fontFamily: 'Inter_400Regular',
-    marginBottom: 12,
-  },
-  progressBar: {
-    height: 6,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 3,
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
   },
 });
 
