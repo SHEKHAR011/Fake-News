@@ -1,11 +1,14 @@
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { useTheme } from '../../src/contexts/ThemeContext';
 
 const TypingIndicator: React.FC = () => {
+  const { theme } = useTheme();
+  
   return (
     <View style={styles.typingIndicator}>
-      <ActivityIndicator size="small" color="#19c37d" />
-      <Text style={styles.typingText}>Analyzing...</Text>
+      <ActivityIndicator size="small" color={theme.REAL} />
+      <Text style={[styles.typingText, { color: theme.TIMESTAMP }]}>Analyzing...</Text>
     </View>
   );
 };
@@ -17,7 +20,6 @@ const styles = StyleSheet.create({
   },
   typingText: {
     marginLeft: 8,
-    color: '#9ca3af',
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
   },

@@ -1,14 +1,17 @@
 import { Stack } from 'expo-router';
+import { ThemeProvider } from '../src/contexts/ThemeContext';
 
 export default function RootLayout() {
   return (
-    <Stack>
-      <Stack.Screen 
-        name="index" 
-        options={{
-          headerShown: false,
-        }} 
-      />
-    </Stack>
+    <ThemeProvider>
+      <Stack>
+        <Stack.Screen 
+          name="index" 
+          options={{
+            headerShown: false,
+          }} 
+        />
+      </Stack>
+    </ThemeProvider>
   );
 }

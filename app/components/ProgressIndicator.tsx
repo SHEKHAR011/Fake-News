@@ -22,7 +22,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ stage }) => {
   return (
     <View style={styles.container}>
       <Text style={[styles.text, { color: theme.DEFAULT_TEXT }]}>{getStageText()}</Text>
-      <View style={styles.progressBar}>
+      <View style={[styles.progressBar, { backgroundColor: theme.BORDER }]}>
         <View style={[
           styles.progressFill, 
           { 
@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#e5e7eb',
     borderRadius: 3,
     overflow: 'hidden',
   },

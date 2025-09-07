@@ -1,23 +1,26 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { COLORS, SIZES } from '../../src/constants/AppConstants';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { Message } from '../../src/types/Message';
+import ProgressIndicator from './ProgressIndicator';
 import TypingIndicator from './TypingIndicator';
 
 interface ChatMessageProps {
   message: Message;
   timestamp?: string; 
   isLoading?: boolean;
+  loadingStage?: 'analyzing' | 'processing' | 'generating' | 'complete';
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ message, timestamp, isLoading = false }) => {
+const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ message, timestamp, isLoading = false, loadingStage = 'analyzing' }) => {
+  const { theme } = useTheme();
   
   const getTextColor = () => {
-    if (message.status === "real") return styles.realText;
-    if (message.status === "fake") return styles.fakeText;
-    if (message.status === "uncertain") return styles.uncertainText;
-    return styles.defaultText;
+    if (message.status === "real") return theme.REAL;
+    if (message.status === "fake") return theme.FAKE;
+    if (message.status === "uncertain") return theme.UNCERTAIN;
+    return theme.DEFAULT_TEXT;
   };
 
   return (
@@ -28,24 +31,28 @@ const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ message, timestamp
       ]}
     >
       {!message.isUser && (
-        <View style={styles.avatar}>
+        <View style={[styles.avatar, { backgroundColor: theme.AI_AVATAR }]}>
           <MaterialIcons name="fact-check" size={20} color="#fff" />
         </View>
       )}
-      <View style={styles.messageContent}>
+      <View style={[styles.messageContent, { backgroundColor: theme.AI_BUBBLE }]}>
         {isLoading ? (
-          <TypingIndicator />
+          loadingStage ? (
+            <ProgressIndicator stage={loadingStage} />
+          ) : (
+            <TypingIndicator />
+          )
         ) : (
           <>
-            <Text style={[styles.messageText, getTextColor()]}>{message.text}</Text>
+            <Text style={[styles.messageText, { color: getTextColor() }]}>{message.text}</Text>
             {timestamp && (
-              <Text style={styles.timestamp}>{timestamp}</Text>
+              <Text style={[styles.timestamp, { color: theme.TIMESTAMP }]}>{timestamp}</Text>
             )}
           </>
         )}
       </View>
       {message.isUser && (
-        <View style={styles.userAvatar}>
+        <View style={[styles.userAvatar, { backgroundColor: theme.USER_AVATAR }]}>
           <MaterialIcons name="person" size={20} color="#fff" />
         </View>
       )}
@@ -59,7 +66,8 @@ const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ message, timestamp
     prevProps.message.isUser === nextProps.message.isUser &&
     prevProps.message.status === nextProps.message.status &&
     prevProps.timestamp === nextProps.timestamp &&
-    prevProps.isLoading === nextProps.isLoading
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.loadingStage === nextProps.loadingStage
   );
 });
 
@@ -79,28 +87,25 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   avatar: {
-    width: SIZES.AVATAR_SIZE,
-    height: SIZES.AVATAR_SIZE,
-    borderRadius: SIZES.BORDER_RADIUS,
-    backgroundColor: COLORS.AI_AVATAR,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SIZES.MARGIN,
+    marginRight: 12,
   },
   userAvatar: {
-    width: SIZES.AVATAR_SIZE,
-    height: SIZES.AVATAR_SIZE,
-    borderRadius: SIZES.BORDER_RADIUS,
-    backgroundColor: COLORS.USER_AVATAR,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: SIZES.MARGIN,
+    marginLeft: 12,
   },
   messageContent: {
     flex: 1,
-    backgroundColor: COLORS.AI_BUBBLE,
-    borderRadius: SIZES.BORDER_RADIUS,
-    padding: SIZES.PADDING,
+    borderRadius: 18,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -112,22 +117,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     lineHeight: 22,
   },
-  defaultText: {
-    color: COLORS.DEFAULT_TEXT,
-  },
-  realText: {
-    color: COLORS.REAL,
-  },
-  fakeText: {
-    color: COLORS.FAKE,
-  },
-  uncertainText: {
-    color: COLORS.UNCERTAIN,
-  },
   timestamp: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: COLORS.TIMESTAMP,
     marginTop: 8,
     alignSelf: 'flex-end',
   },
