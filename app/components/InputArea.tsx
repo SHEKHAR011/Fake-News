@@ -50,6 +50,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
           ]}
           onPress={handleSendPress}
           disabled={!inputText.trim() || isLoading}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <MaterialIcons name="send" size={20} color="#fff" />
         </TouchableOpacity>
@@ -75,8 +76,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     maxHeight: 120,
-    // Add some extra padding for better touch handling
-    padding: 4,
   },
   textInput: {
     flex: 1,
@@ -98,8 +97,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     // Ensure proper touch handling
     zIndex: 1,
-    // Add hitSlop for better touch target
-    hitSlop: { top: 10, bottom: 10, left: 10, right: 10 },
   },
 });
 

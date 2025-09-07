@@ -1,5 +1,5 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Modal, Alert, Animated, Easing } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -24,75 +24,42 @@ export default function HomeScreen() {
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const scrollViewRef = React.useRef<ScrollView>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(300)).current;
+  const slideAnim = useRef(new Animated.Value(-300)).current;
   const messageFadeAnims = useRef<{[key: string]: Animated.Value}>({}).current;
   const loadingFadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Load messages and conversations from storage on component mount
-  useEffect(() => {
-    const initializeApp = async () => {
-      // Load conversations
-      const loadedConversations: Conversation[] = await loadConversations();
-      
-      if (loadedConversations.length > 0) {
-        setConversations(loadedConversations);
-        // Load messages for the first conversation
-        const firstConversation = loadedConversations[0];
-        setCurrentConversationId(firstConversation.id);
-        const conversationMessages = await loadConversationMessages(firstConversation.id);
-        if (conversationMessages.length > 0) {
-          setMessages(conversationMessages);
-          // Animate all loaded messages
-          conversationMessages.forEach(message => {
-            if (!messageFadeAnims[message.id]) {
-              messageFadeAnims[message.id] = new Animated.Value(0);
-            }
-            Animated.timing(messageFadeAnims[message.id], {
-              toValue: 1,
-              duration: 300,
-              useNativeDriver: true,
-            }).start();
-          });
-        } else {
-          // Set default welcome message with empty text to trigger WelcomeMessage component
-          const welcomeMessage: Message = {
-            id: 1,
-            text: "",  // Empty text triggers WelcomeMessage component
-            isUser: false,
-            timestamp: new Date(),
-          };
-          setMessages([welcomeMessage]);
-          // Animate welcome message
-          if (!messageFadeAnims[welcomeMessage.id]) {
-            messageFadeAnims[welcomeMessage.id] = new Animated.Value(0);
+  const initializeApp = useCallback(async () => {
+    // Load conversations
+    const loadedConversations: Conversation[] = await loadConversations();
+    
+    if (loadedConversations.length > 0) {
+      setConversations(loadedConversations);
+      // Load messages for the first conversation
+      const firstConversation = loadedConversations[0];
+      setCurrentConversationId(firstConversation.id);
+      const conversationMessages = await loadConversationMessages(firstConversation.id);
+      if (conversationMessages.length > 0) {
+        setMessages(conversationMessages);
+        // Animate all loaded messages
+        conversationMessages.forEach(message => {
+          if (!messageFadeAnims[message.id]) {
+            messageFadeAnims[message.id] = new Animated.Value(0);
           }
-          Animated.timing(messageFadeAnims[welcomeMessage.id], {
+          Animated.timing(messageFadeAnims[message.id], {
             toValue: 1,
             duration: 300,
             useNativeDriver: true,
           }).start();
-        }
+        });
       } else {
-        // Check if this is the user's first time
-        const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
-        
-        // Create first conversation
-        const newConversation = createConversation("New Analysis");
-        setConversations([newConversation]);
-        setCurrentConversationId(newConversation.id);
-        await saveConversations([newConversation]);
-        
-        // Set appropriate welcome message with empty text to trigger WelcomeMessage component
+        // Set default welcome message with empty text to trigger WelcomeMessage component
         const welcomeMessage: Message = {
           id: 1,
-          text: hasOnboarded ? "" : "",  // Empty text triggers WelcomeMessage component
+          text: "",  // Empty text triggers WelcomeMessage component
           isUser: false,
           timestamp: new Date(),
         };
-        
         setMessages([welcomeMessage]);
-        await saveConversationMessages(newConversation.id, [welcomeMessage]);
-        
         // Animate welcome message
         if (!messageFadeAnims[welcomeMessage.id]) {
           messageFadeAnims[welcomeMessage.id] = new Animated.Value(0);
@@ -103,10 +70,43 @@ export default function HomeScreen() {
           useNativeDriver: true,
         }).start();
       }
-    };
+    } else {
+      // Check if this is the user's first time
+      const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
+      
+      // Create first conversation
+      const newConversation = createConversation("New Analysis");
+      setConversations([newConversation]);
+      setCurrentConversationId(newConversation.id);
+      await saveConversations([newConversation]);
+      
+      // Set appropriate welcome message with empty text to trigger WelcomeMessage component
+      const welcomeMessage: Message = {
+        id: 1,
+        text: hasOnboarded ? "" : "",  // Empty text triggers WelcomeMessage component
+        isUser: false,
+        timestamp: new Date(),
+      };
+      
+      setMessages([welcomeMessage]);
+      await saveConversationMessages(newConversation.id, [welcomeMessage]);
+      
+      // Animate welcome message
+      if (!messageFadeAnims[welcomeMessage.id]) {
+        messageFadeAnims[welcomeMessage.id] = new Animated.Value(0);
+      }
+      Animated.timing(messageFadeAnims[welcomeMessage.id], {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [messageFadeAnims]);
 
+  // Load messages and conversations from storage on component mount
+  useEffect(() => {
     initializeApp();
-  }, []);
+  }, [initializeApp]);
 
   // Enhanced keyboard handling
   useEffect(() => {
@@ -133,26 +133,43 @@ export default function HomeScreen() {
   // Sidebar animation effect
   useEffect(() => {
     if (sidebarVisible) {
+      // Reset values for slide in
+      slideAnim.setValue(-300);
+      fadeAnim.setValue(0);
+      
       // Slide in animation
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 300,
-          easing: Easing.out(Easing.exp),
+          easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         })
       ]).start();
     } else {
-      // Reset values for next open
-      slideAnim.setValue(300);
-      fadeAnim.setValue(0);
+      // Slide out animation
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: -300,
+          duration: 300,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 300,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        })
+      ]).start();
     }
-  }, [sidebarVisible, fadeAnim, slideAnim]);
+  }, [sidebarVisible, slideAnim, fadeAnim]);
 
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -559,12 +576,40 @@ export default function HomeScreen() {
         visible={sidebarVisible}
         onRequestClose={() => setSidebarVisible(false)}
       >
-        <Animated.View style={[styles.sidebarOverlay, { backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)', opacity: fadeAnim }]}>
-          <Animated.View style={[styles.sidebar, { backgroundColor: theme.SIDEBAR_BACKGROUND, borderRightColor: theme.SIDEBAR_BORDER, transform: [{ translateX: slideAnim }] }]}>
+        <Animated.View 
+          style={[
+            styles.sidebarOverlay, 
+            { 
+              backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)', 
+              opacity: fadeAnim 
+            }
+          ]}
+          onTouchEnd={(e) => {
+            // Close sidebar when tapping on overlay (but not on sidebar content)
+            if (e.target === e.currentTarget) {
+              setSidebarVisible(false);
+            }
+          }}
+        >
+          <Animated.View 
+            style={[
+              styles.sidebar, 
+              { 
+                backgroundColor: theme.SIDEBAR_BACKGROUND, 
+                borderRightColor: theme.SIDEBAR_BORDER, 
+                transform: [{ translateX: slideAnim }],
+                shadowColor: '#000',
+                shadowOffset: { width: -2, height: 0 },
+                shadowOpacity: 0.2,
+                shadowRadius: 10,
+                elevation: 10,
+              }
+            ]}
+          >
             <View style={[styles.sidebarHeader, { borderBottomColor: theme.SIDEBAR_BORDER, backgroundColor: theme.SIDEBAR_BACKGROUND }]}>
               <Text style={[styles.sidebarTitle, { color: theme.DEFAULT_TEXT }]}>Fake News Detector</Text>
               <TouchableOpacity onPress={() => setSidebarVisible(false)} style={styles.closeButton}>
-                <MaterialIcons name="close" size={20} color={theme.DEFAULT_TEXT} />
+                <MaterialIcons name="close" size={24} color={theme.DEFAULT_TEXT} />
               </TouchableOpacity>
             </View>
             
@@ -659,6 +704,7 @@ export default function HomeScreen() {
             // Create a fade animation for this message if it doesn't exist
             if (!messageFadeAnims[message.id]) {
               messageFadeAnims[message.id] = new Animated.Value(0);
+              // Start animation for new messages
               Animated.timing(messageFadeAnims[message.id], {
                 toValue: 1,
                 duration: 300,
@@ -774,10 +820,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sidebar: {
-    width: '80%',
+    width: '85%',
     height: '100%',
     paddingTop: 60,
     borderRightWidth: 1,
+    maxWidth: 320,
   },
   sidebarHeader: {
     flexDirection: 'row',
@@ -786,6 +833,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 20,
     borderBottomWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   sidebarTitle: {
     fontSize: 20,
@@ -804,9 +856,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
     backgroundColor: '#0ea5e9', // Vibrant blue color
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.3)',
