@@ -1,6 +1,15 @@
-# Welcome to your Expo app 👋
+# Fake News Detector App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is a React Native application that uses AI to detect fake news. Simply paste a news article and get an instant analysis of its credibility.
+
+## Features
+
+- Real-time fake news detection using Gemini AI
+- Color-coded results (green for real, red for fake, orange for uncertain)
+- Chat-style interface for easy interaction
+- History of previous analyses
+- Secure API key management
+- Input validation and error handling
 
 ## Get started
 
@@ -10,7 +19,19 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Start the app
+2. Set up your Gemini API key
+
+   Add your Gemini API key to `app.json` in the `extra` section:
+   
+   ```json
+   "extra": {
+     "GEMINI_API_KEY": "your_actual_api_key_here"
+   }
+   ```
+   
+   You can get your API key from [Google AI Studio](https://aistudio.google.com/).
+
+3. Start the app
 
    ```bash
    npx expo start
@@ -23,17 +44,40 @@ In the output, you'll find options to open the app in a
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Project Structure
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+.
+├── app/                    # Main application screens
+│   ├── components/         # Reusable UI components
+│   └── ...                 # Screen files
+├── services/               # API services (Gemini integration)
+├── src/
+│   ├── constants/          # Application constants
+│   ├── types/              # TypeScript types
+│   └── ...                 # Other source files
+├── utils/                  # Utility functions
+├── app.json                # Expo configuration with API key
+└── ...                     # Other configuration files
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Technical Improvements
+
+This project includes several technical improvements:
+
+1. **Security**: API keys are stored in app.json configuration, not in source code
+2. **Error Handling**: Comprehensive error handling for API calls and user input
+3. **Performance**: 
+   - React.memo for optimized component rendering
+   - AsyncStorage for message persistence
+4. **Code Quality**: 
+   - TypeScript types for better code reliability
+   - Constants for consistent styling and values
+   - Input validation for user-submitted content
+5. **User Experience**:
+   - Persistent chat history
+   - Clear error messages
+   - Responsive design
 
 ## Learn more
 

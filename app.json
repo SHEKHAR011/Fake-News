@@ -37,6 +37,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "GEMINI_API_KEY": "AIzaSyArnlDIUPAILtJJEt02GttnWwk9R_vv7Wc"
     }
   }
 }
+
+
