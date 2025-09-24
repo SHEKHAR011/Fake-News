@@ -9,11 +9,27 @@ export const analyzeNewsWithGemini = async (newsText) => {
 
   try {
     // Initialize the Gemini API client
-    // In Expo, we access environment variables through Constants.expoConfig.extra
+    // Strictly require the API key to come from `.env` injected into Expo runtime
+    // config (expo.extra) via `app.config.js`. We do not fall back to other sources.
     const apiKey = Constants.expoConfig?.extra?.GEMINI_API_KEY;
-    
+
+    // Only print debug details when DEBUG=true is set in expo.extra or process.env
+    try {
+      const expoExtra = Constants.expoConfig?.extra ?? Constants.manifest?.extra;
+      const debugFlag = (expoExtra && expoExtra.DEBUG === 'true') || process.env.DEBUG === 'true';
+      if (debugFlag) {
+        console.log('[DEBUG] GEMINI_API_KEY present in expo.extra:', !!apiKey);
+        if (apiKey) {
+          try {
+            const masked = `${apiKey.slice(0,6)}...${apiKey.slice(-4)}`;
+            console.log('[DEBUG] GEMINI_API_KEY loaded (masked):', masked);
+          } catch {}
+        }
+      }
+    } catch {}
+
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not configured. Please check your app.json configuration.');
+      throw new Error('GEMINI_API_KEY is not configured in expo.extra. Ensure you have a `.env` at project root and restart the Expo dev server so app.config.js injects the key.');
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);

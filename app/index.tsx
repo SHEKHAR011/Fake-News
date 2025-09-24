@@ -1,18 +1,18 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
-import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, Modal, Alert, Animated, Easing } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Easing, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { analyzeNewsWithGemini } from '../services/geminiService';
+import { useTheme } from '../src/contexts/ThemeContext';
 import { Message } from '../src/types/Message';
+import { Conversation, createConversation, loadConversationMessages, loadConversations, saveConversationMessages, saveConversations } from '../utils/conversationStorage';
 import { formatTime } from '../utils/helpers';
 import { validateNewsContent } from '../utils/validators';
-import { Conversation, createConversation, loadConversations, saveConversations, loadConversationMessages, saveConversationMessages } from '../utils/conversationStorage';
 import ChatMessage from './components/ChatMessage';
 import InputArea from './components/InputArea';
 import WelcomeMessage from './components/WelcomeMessage';
-import { useTheme } from '../src/contexts/ThemeContext';
 
 export default function HomeScreen() {
   const { theme, isDarkMode } = useTheme();
@@ -307,7 +307,7 @@ export default function HomeScreen() {
       if (error instanceof Error) {
         // Check for specific error messages and provide better user guidance
         if (error.message.includes('API_KEY')) {
-          errorMessageText = 'API key configuration error. Please check your API key in app.json or .env file. Get your key from https://aistudio.google.com/  ';
+          errorMessageText = 'API key configuration error. Please set GEMINI_API_KEY in your `.env` file or build environment. Get your key from https://aistudio.google.com/  ';
         } else if (error.message.includes('Network')) {
           errorMessageText = 'Network error. Please check your internet connection and try again.';
         } else if (error.message.includes('Failed to analyze')) {

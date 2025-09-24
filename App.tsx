@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import HomeScreen from './app/index';
 import OnboardingScreen from './app/screens/OnboardingScreen';
 import { ThemeProvider } from './src/contexts/ThemeContext';
@@ -15,6 +16,19 @@ export default function App() {
         setShowOnboarding(true);
       }
     };
+
+    // Optionally print debug info when DEBUG is enabled in env or expo.extra
+    try {
+      const expoExtra = Constants.expoConfig?.extra ?? Constants.manifest?.extra;
+      const debugFlag = (expoExtra && expoExtra.DEBUG === 'true') || process.env.DEBUG === 'true';
+      if (debugFlag) {
+        const hasExpo = !!expoExtra?.GEMINI_API_KEY;
+        const hasEnv = !!process.env.GEMINI_API_KEY;
+        console.log('[DEBUG] GEMINI_API_KEY presence - expo.extra:', hasExpo, 'process.env:', hasEnv);
+      }
+    } catch {
+      // ignore
+    }
 
     checkIfAlreadyOnboarded();
   }, []);

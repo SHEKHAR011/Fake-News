@@ -21,14 +21,12 @@ This is a React Native application that uses AI to detect fake news. Simply past
 
 2. Set up your Gemini API key
 
-   Add your Gemini API key to `app.json` in the `extra` section:
-   
-   ```json
-   "extra": {
-     "GEMINI_API_KEY": "your_actual_api_key_here"
-   }
+   Create a `.env` file at the project root (copy `.env.example`) and add your Gemini API key:
+
+   ```properties
+   GEMINI_API_KEY=your_actual_api_key_here
    ```
-   
+
    You can get your API key from [Google AI Studio](https://aistudio.google.com/).
 
 3. Start the app
