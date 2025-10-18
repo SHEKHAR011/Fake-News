@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Fake-NewsCopy",
-    "slug": "Fake-NewsCopy",
+    "name": "Fake-News",
+    "slug": "Fake-News",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "fakenewscopy",
+    "scheme": "fakenews",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
