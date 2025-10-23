@@ -18,4 +18,9 @@ if (process.env.GEMINI_API_KEY) {
   appJson.expo.extra.GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 }
 
+// Inject CLERK_PUBLISHABLE_KEY from process.env into expo.extra for runtime access
+if (process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+  appJson.expo.extra.CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+}
+
 module.exports = appJson;

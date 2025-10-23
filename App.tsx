@@ -1,22 +1,17 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import HomeScreen from './app/index';
-import OnboardingScreen from './app/screens/OnboardingScreen';
+import React, { useEffect } from 'react';
+import { SplashScreen } from 'expo-router';
+import { useFonts } from 'expo-font';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 
 export default function App() {
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [fontsLoaded] = useFonts({
+    'Inter-Black': require('./assets/fonts/Inter-Black.ttf'),
+    'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
+    'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
+  });
 
   useEffect(() => {
-    const checkIfAlreadyOnboarded = async () => {
-      const onboarded = await AsyncStorage.getItem('hasOnboarded');
-      if (!onboarded) {
-        setShowOnboarding(true);
-      }
-    };
-
     // Optionally print debug info when DEBUG is enabled in env or expo.extra
     try {
       const expoExtra = Constants.expoConfig?.extra ?? Constants.manifest?.extra;
@@ -29,30 +24,17 @@ export default function App() {
     } catch {
       // ignore
     }
-
-    checkIfAlreadyOnboarded();
   }, []);
 
-  const handleOnboardingComplete = async () => {
-    await AsyncStorage.setItem('hasOnboarded', 'true');
-    setShowOnboarding(false);
-  };
+  if (!fontsLoaded) {
+    return <SplashScreen />;
+  }
 
+  // The actual navigation is handled by Expo Router
   return (
     <ThemeProvider>
-      <View style={styles.container}>
-        {showOnboarding ? (
-          <OnboardingScreen onComplete={handleOnboardingComplete} />
-        ) : (
-          <HomeScreen />
-        )}
-      </View>
+      {/* The router handles all navigation */}
+      <SplashScreen />
     </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

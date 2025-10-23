@@ -19,15 +19,18 @@ This is a React Native application that uses AI to detect fake news. Simply past
    npm install
    ```
 
-2. Set up your Gemini API key
+2. Set up your API keys
 
-   Create a `.env` file at the project root (copy `.env.example`) and add your Gemini API key:
+   Create a `.env` file at the project root (copy `.env.example`) and add your API keys:
 
    ```properties
    GEMINI_API_KEY=your_actual_api_key_here
+   EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
    ```
 
-   You can get your API key from [Google AI Studio](https://aistudio.google.com/).
+   You can get your:
+   - Gemini API key from [Google AI Studio](https://aistudio.google.com/)
+   - Clerk Publishable Key from your [Clerk Dashboard](https://dashboard.clerk.com/)
 
 3. Start the app
 
@@ -46,24 +49,41 @@ In the output, you'll find options to open the app in a
 
 ```
 .
-├── app/                    # Main application screens
-│   ├── components/         # Reusable UI components
-│   └── ...                 # Screen files
+├── app/                    # Expo Router application screens
+│   ├── (auth)/             # Authentication-related screens
+│   │   ├── _layout.tsx     # Auth section layout
+│   │   ├── sign-in.tsx     # Sign-in screen
+│   │   └── sign-up.tsx     # Sign-up screen
+│   ├── (home)/             # Home/main application screens
+│   │   ├── _layout.tsx     # Main app layout (requires authentication)
+│   │   └── index.tsx       # Main home screen
+│   ├── components/         # Screen-specific components (moved to src/components)
+│   ├── _layout.tsx         # Root layout with ClerkProvider and ThemeProvider
+│   ├── index.tsx           # Entry point (redirects based on auth status)
+│   └── onboarding.tsx      # Onboarding flow
+├── assets/                 # Static assets (images, fonts)
+├── docs/                   # Documentation files
 ├── services/               # API services (Gemini integration)
 ├── src/
+│   ├── components/         # Reusable UI components (moved from app/components)
+│   ├── contexts/           # React context providers
 │   ├── constants/          # Application constants
-│   ├── types/              # TypeScript types
-│   └── ...                 # Other source files
-├── utils/                  # Utility functions
-├── app.json                # Expo configuration with API key
-└── ...                     # Other configuration files
+│   ├── types/              # TypeScript type definitions
+│   └── utils/              # Utility functions
+├── .env.example            # Example environment variables file
+├── app.config.js           # Expo configuration with environment variable injection
+├── app.json                # Expo app configuration
+├── App.tsx                 # Main application component
+└── README.md               # Project documentation
 ```
 
 ## Technical Improvements
 
 This project includes several technical improvements:
 
-1. **Security**: API keys are stored in app.json configuration, not in source code
+1. **Security**: 
+   - API keys are now loaded from environment variables instead of being stored in app.json
+   - Clerk authentication system for secure user management
 2. **Error Handling**: Comprehensive error handling for API calls and user input
 3. **Performance**: 
    - React.memo for optimized component rendering
@@ -76,6 +96,7 @@ This project includes several technical improvements:
    - Persistent chat history
    - Clear error messages
    - Responsive design
+   - Secure authentication flow
 
 ## Learn more
 
