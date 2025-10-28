@@ -41,7 +41,7 @@ export const analyzeNewsWithGemini = async (newsText) => {
     "${newsText}"
     
     Provide a concise analysis with:
-    1. Likelihood of being fake (Low/Medium/High)
+    1. Likelihood of being fake (Low/Medium/High) ("and answer should be on Low/Medium/High only keep in mind")
     2. Key indicators
     3. Confidence level (0-100%)
     4. Verification recommendations
