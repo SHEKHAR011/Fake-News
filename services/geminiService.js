@@ -11,9 +11,12 @@ export const analyzeNewsWithGemini = async (newsText) => {
     // Initialize the Gemini API client
     // Strictly require the API key to come from `.env` injected into Expo runtime
     // config (expo.extra) via `app.config.js`. We do not fall back to other sources.
+
+
     const apiKey = Constants.expoConfig?.extra?.GEMINI_API_KEY;
 
     // Only print debug details when DEBUG=true is set in expo.extra or process.env
+
     try {
       const expoExtra = Constants.expoConfig?.extra ?? Constants.manifest?.extra;
       const debugFlag = (expoExtra && expoExtra.DEBUG === 'true') || process.env.DEBUG === 'true';
@@ -31,6 +34,7 @@ export const analyzeNewsWithGemini = async (newsText) => {
     if (!apiKey) {
       throw new Error('GEMINI_API_KEY is not configured in expo.extra. Ensure you have a `.env` at project root and restart the Expo dev server so app.config.js injects the key.');
     }
+
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
