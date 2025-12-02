@@ -1,7 +1,13 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
 
 # Expo
 .expo/
@@ -9,7 +15,9 @@ dist/
 web-build/
 expo-env.d.ts
 
-# Native
+# Native builds
+android/
+ios/
 .kotlin/
 *.orig.*
 *.jks
@@ -17,24 +25,62 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+*.keystore
 
-# Metro
+# Metro bundler
 .metro-health-check*
+.metro-cache/
 
-# debug
+# Debug logs
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
+logs/
+lerna-debug.log*
+.pnpm-debug.log*
 
-# macOS
+# Environment variables
+.env
+.env*.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
 *.pem
 
-# local env files
-.env*.local
-/.env
+# Testing
+coverage/
+*.lcov
+.nyc_output
 
-# typescript
+# TypeScript
 *.tsbuildinfo
+*.tsbuildinfo.json
 
+# Build outputs
+build/
+out/
+.next/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Project specific
 app-example
