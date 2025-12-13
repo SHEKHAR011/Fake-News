@@ -18,11 +18,9 @@ export const tokenCache: TokenCache = {
       console.error('Error saving token to SecureStore:', error);
     }
   },
-  async removeToken(key: string) {
-    try {
-      await SecureStore.deleteItemAsync(key);
-    } catch (error) {
+  clearToken(key: string) {
+    void SecureStore.deleteItemAsync(key).catch((error) => {
       console.error('Error removing token from SecureStore:', error);
-    }
+    });
   },
 };

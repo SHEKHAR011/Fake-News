@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
-import React, { useEffect } from 'react';
-import { SplashScreen } from 'expo-router';
 import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import React, { useEffect } from 'react';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 
 export default function App() {
@@ -10,6 +10,20 @@ export default function App() {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
   });
+
+  useEffect(() => {
+    SplashScreen.preventAutoHideAsync().catch(() => {
+      // ignore
+    });
+  }, []);
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync().catch(() => {
+        // ignore
+      });
+    }
+  }, [fontsLoaded]);
 
   useEffect(() => {
     // Optionally print debug info when DEBUG is enabled in env or expo.extra
@@ -27,14 +41,8 @@ export default function App() {
   }, []);
 
   if (!fontsLoaded) {
-    return <SplashScreen />;
+    return null;
   }
 
-  // The actual navigation is handled by Expo Router
-  return (
-    <ThemeProvider>
-      {/* The router handles all navigation */}
-      <SplashScreen />
-    </ThemeProvider>
-  );
+  return <ThemeProvider>{null}</ThemeProvider>;
 }

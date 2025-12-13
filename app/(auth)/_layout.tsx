@@ -1,7 +1,7 @@
+import { useAuth } from '@clerk/clerk-expo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Redirect } from 'expo-router';
 import { Stack } from 'expo-router/stack';
-import { useAuth } from '@clerk/clerk-expo'
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 
     export default function AuthLayout() {
@@ -28,25 +28,12 @@ import { useEffect, useState } from 'react';
 
     // If auth isn't loaded yet, don't redirect
     if (!isLoaded) {
-        return <Stack screenOptions={{ 
+        return <Stack screenOptions={{
       headerShown: false,
-      cardStyle: { 
-        backgroundColor: '#f7f7f8'
+      contentStyle: {
+        backgroundColor: '#f7f7f8',
       },
-      cardStyleInterpolator: ({ current, layouts }) => {
-        return {
-          cardStyle: {
-            transform: [
-              {
-                translateX: current.progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [layouts.screen.width, 0],
-                }),
-              },
-            ],
-          },
-        };
-      },
+      animation: 'slide_from_right',
     }} />;
     }
 
@@ -60,24 +47,11 @@ import { useEffect, useState } from 'react';
         return <Redirect href="/" />;
     }
 
-    return <Stack screenOptions={{ 
+    return <Stack screenOptions={{
       headerShown: false,
-      cardStyle: { 
-        backgroundColor: '#f7f7f8'
+      contentStyle: {
+        backgroundColor: '#f7f7f8',
       },
-      cardStyleInterpolator: ({ current, layouts }) => {
-        return {
-          cardStyle: {
-            transform: [
-              {
-                translateX: current.progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [layouts.screen.width, 0],
-                }),
-              },
-            ],
-          },
-        };
-      },
+      animation: 'slide_from_right',
     }} />;
     }

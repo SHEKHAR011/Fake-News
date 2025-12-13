@@ -1,12 +1,12 @@
-import { Stack } from 'expo-router/stack';
-import { ThemeProvider } from '../src/contexts/ThemeContext';
 import { ClerkProvider } from '@clerk/clerk-expo';
-import { tokenCache } from '../src/utils/token-cache';
 import Constants from 'expo-constants';
-import { AuthOnboardingProvider } from '../src/contexts/AuthOnboardingContext';
-import { View, StyleSheet } from 'react-native';
-import { useEffect, useRef } from 'react';
+import { Stack } from 'expo-router/stack';
+import { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { AuthOnboardingProvider } from '../src/contexts/AuthOnboardingContext';
+import { ThemeProvider } from '../src/contexts/ThemeContext';
+import { tokenCache } from '../src/utils/token-cache';
 
 // Custom component to handle Clerk initialization
 function ClerkRoot({ children }: { children: React.ReactNode }) {
@@ -34,7 +34,7 @@ export default function RootLayout() {
     setTimeout(() => {
       opacity.value = withTiming(1, { duration: 500 });
     }, 100);
-  }, []);
+  }, [opacity]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -49,21 +49,8 @@ export default function RootLayout() {
           <Animated.View style={[StyleSheet.absoluteFill, animatedStyle]}>
             <Stack screenOptions={{ 
               headerShown: false,
-              cardStyle: { backgroundColor: '#f7f7f8' },
-              cardStyleInterpolator: ({ current, layouts }) => {
-                return {
-                  cardStyle: {
-                    transform: [
-                      {
-                        translateX: current.progress.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [layouts.screen.width, 0],
-                        }),
-                      },
-                    ],
-                  },
-                };
-              },
+              contentStyle: { backgroundColor: '#f7f7f8' },
+              animation: 'slide_from_right',
             }}>
               <Stack.Screen 
                 name="index" 

@@ -1,7 +1,7 @@
-import { Redirect } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
+import { Redirect } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../src/contexts/ThemeContext';
 
 export default function Root() {
@@ -24,7 +24,7 @@ export default function Root() {
     return () => {
       spinAnimation.stop(); // Clean up animation
     };
-  }, []);
+  }, [spinValue]);
 
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
@@ -45,7 +45,7 @@ export default function Root() {
 
   // If signed in, redirect to home (main app)
   if (isSignedIn) {
-    return <Redirect href="/(home)/" />;
+    return <Redirect href="/(home)" />;
   }
   
   // If not signed in, redirect to auth

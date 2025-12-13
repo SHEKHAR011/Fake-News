@@ -1,7 +1,7 @@
-import * as React from 'react'
-import { Alert, Text, TextInput, TouchableOpacity, View, StyleSheet } from 'react-native'
-import { useSignUp } from '@clerk/clerk-expo'
-import { Link, useRouter } from 'expo-router'
+import { useSignUp } from '@clerk/clerk-expo';
+import { Link, useRouter } from 'expo-router';
+import * as React from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../../src/contexts/ThemeContext';
 
 export default function SignUpScreen() {
@@ -92,7 +92,7 @@ export default function SignUpScreen() {
           <Text style={[styles.appSubtitle, { color: theme.ACCENT }]}>Detector</Text>
         </View>
         <Text style={[styles.title, { color: theme.DEFAULT_TEXT }]}>Verify your email</Text>
-        <Text style={[styles.subtitle, { color: theme.TIMESTAMP }]}>We've sent a verification code to your email</Text>
+        <Text style={[styles.subtitle, { color: theme.TIMESTAMP }]}>{"We've sent a verification code to your email"}</Text>
         <TextInput
           style={[styles.input, { 
             backgroundColor: theme.INPUT_BACKGROUND,

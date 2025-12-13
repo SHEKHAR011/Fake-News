@@ -1,7 +1,7 @@
-import { useSignIn } from '@clerk/clerk-expo'
-import { Link, useRouter } from 'expo-router'
-import { Alert, Text, TextInput, TouchableOpacity, View, StyleSheet } from 'react-native'
-import React from 'react'
+import { useSignIn } from '@clerk/clerk-expo';
+import { Link, useRouter } from 'expo-router';
+import React from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../../src/contexts/ThemeContext';
 
 export default function Page() {
@@ -93,7 +93,7 @@ export default function Page() {
       </TouchableOpacity>
       
       <View style={styles.footer}>
-        <Text style={{ color: theme.DEFAULT_TEXT }}>Don't have an account? </Text>
+        <Text style={{ color: theme.DEFAULT_TEXT }}>{"Don't have an account? "}</Text>
         <Link href="/(auth)/sign-up" style={[styles.link, { color: theme.ACCENT }]}>
           <Text style={{ color: theme.ACCENT }}>Sign up</Text>
         </Link>
