@@ -124,9 +124,9 @@ Then open it using:
 
 ## Preview Video
 
-[<img src="assets/Images/IMG_3320.PNG" width="420" />](assets/Screen%20Rec/SR%20Fake%20New.mp4)
+[<img src="assets/Images/IMG_3320.PNG" width="420" />](https://drive.google.com/file/d/15BwVCjkFsSeAkPvV4PykfWNYdrGNPfSS/view?usp=sharing)
 
-[Watch the preview video](assets/Screen%20Rec/SR%20Fake%20New.mp4)
+[Watch the preview video](https://drive.google.com/file/d/15BwVCjkFsSeAkPvV4PykfWNYdrGNPfSS/view?usp=sharing)
 
 ## Notes
 
