@@ -19,6 +19,21 @@ A React Native (Expo) app that analyzes news/article text with Google Gemini and
 - **Google Generative AI** SDK (`@google/generative-ai`)
 - **AsyncStorage** for local persistence
 
+## Screenshots
+
+<p float="left">
+  <img src="assets/Images/IMG_3321-2.png" width="240" style="margin-right: 20px;" />
+  <img src="assets/Images/IMG_3320.PNG" width="240" style="margin-right: 20px;" />
+  <img src="assets/Images/IMG_3322-2.png" width="240" />
+</p>
+
+## Preview Video
+
+[<img src="assets/Images/IMG_3320.PNG" width="240" />](https://drive.google.com/file/d/15BwVCjkFsSeAkPvV4PykfWNYdrGNPfSS/view?usp=sharing)
+
+[Watch the preview video](https://drive.google.com/file/d/15BwVCjkFsSeAkPvV4PykfWNYdrGNPfSS/view?usp=sharing)
+
+
 ## Getting Started
 
 ### Prerequisites
@@ -113,20 +128,6 @@ Then open it using:
 ├── App.tsx                   # App bootstrap (fonts/splash coordination)
 └── README.md
 ```
-
-## Screenshots
-
-<p float="left">
-  <img src="assets/Images/IMG_3321-2.png" width="240" />
-  <img src="assets/Images/IMG_3320.PNG" width="240" />
-  <img src="assets/Images/IMG_3322-2.png" width="240" />
-</p>
-
-## Preview Video
-
-[<img src="assets/Images/IMG_3320.PNG" width="420" />](https://drive.google.com/file/d/15BwVCjkFsSeAkPvV4PykfWNYdrGNPfSS/view?usp=sharing)
-
-[Watch the preview video](https://drive.google.com/file/d/15BwVCjkFsSeAkPvV4PykfWNYdrGNPfSS/view?usp=sharing)
 
 ## Notes
 
