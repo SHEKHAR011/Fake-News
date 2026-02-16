@@ -19,7 +19,7 @@ A React Native (Expo) app that analyzes news/article text with Google Gemini and
 - **Google Generative AI** SDK (`@google/generative-ai`)
 - **AsyncStorage** for local persistence
 
-## Screenshots
+## Preview Images
 
 <p float="left">
   <img src="assets/Images/IMG_3321-2.png" width="240" style="margin-right: 20px;" />
