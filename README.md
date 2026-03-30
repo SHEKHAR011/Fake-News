@@ -27,12 +27,6 @@ A React Native (Expo) app that analyzes news/article text with Google Gemini and
   <img src="assets/Images/IMG_3322-2.png" width="240" />
 </p>
 
-## Preview Video
-
-[<img src="assets/Images/IMG_3320.PNG" width="240" />](https://drive.google.com/file/d/15BwVCjkFsSeAkPvV4PykfWNYdrGNPfSS/view?usp=sharing)
-
-[Watch the preview video](https://drive.google.com/file/d/15BwVCjkFsSeAkPvV4PykfWNYdrGNPfSS/view?usp=sharing)
-
 
 ## Getting Started
 
